@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -8,6 +9,7 @@ using System.Xml;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.SlowCheetah;
 
 namespace ApplyConfigTransformInPlace.VSIX
 {
@@ -53,6 +55,16 @@ namespace ApplyConfigTransformInPlace.VSIX
             }
         }
 
+        /// <summary>
+        /// The transform file is the one the user selected.
+        /// </summary>
+        private string TransformFile { get; set; }
+
+        /// <summary>
+        /// The Destination file is either App or Web.config
+        /// </summary>
+        private string DestinationFile { get; set; }
+
         #endregion
 
         /// <summary>
@@ -61,6 +73,7 @@ namespace ApplyConfigTransformInPlace.VSIX
         /// <param name="package">Owner package, not null.</param>
         public static void Initialize(Package package)
         {
+            Debug.WriteLine("Instance Initialized");
             Instance = new ApplyConfigTransformInPlaceCmd(package);
         }
 
@@ -95,12 +108,14 @@ namespace ApplyConfigTransformInPlace.VSIX
             }
         }
 
-        private void menuCommand_BeforeQueryStatus_Old(object sender, EventArgs e)
+        private void menuCommand_BeforeQueryStatus(object sender, EventArgs e)
         {
+            Debug.WriteLine("Entering BeforeQueryStatus");
             // get the menu that fired the event
             var menuCommand = sender as OleMenuCommand;
             if (menuCommand != null)
             {
+                Debug.WriteLine("Evaluating BeforeQueryStatus.");
                 // start by assuming that the menu will not be shown
                 menuCommand.Visible = false;
                 menuCommand.Enabled = false;
@@ -109,41 +124,14 @@ namespace ApplyConfigTransformInPlace.VSIX
                 uint itemid = VSConstants.VSITEMID_NIL;
 
                 if (!IsSingleProjectItemSelection(out hierarchy, out itemid)) return;
-                // Get the file path
-                string itemFullPath = null;
-                ((IVsProject)hierarchy).GetMkDocument(itemid, out itemFullPath);
-                var transformFileInfo = new FileInfo(itemFullPath);
-
-                // then check if the file is named 'web.config'
-                bool isConfig = transformFileInfo.Name.EndsWith(".config", StringComparison.OrdinalIgnoreCase);
-
-                // if not leave the menu hidden
-                if (!isConfig) return;
-
-                menuCommand.Visible = true;
-                menuCommand.Enabled = true;
-            }
-        }
-
-        private void OnBeforeQueryStatusAddTransformCommand(object sender, EventArgs e)
-        {
-            // get the menu that fired the event
-            var menuCommand = sender as OleMenuCommand;
-            if (menuCommand != null)
-            {
-                // start by assuming that the menu will not be shown
-                menuCommand.Visible = false;
-                menuCommand.Enabled = false;
-
-                IVsHierarchy hierarchy = null;
-                uint itemid = VSConstants.VSITEMID_NIL;
-
-                if (!IsSingleProjectItemSelection(out hierarchy, out itemid)) return;
+                Debug.WriteLine("Project Is NOT Selected.");
 
                 var vsProject = (IVsProject)hierarchy;
                 if (!ProjectSupportsTransforms(vsProject)) return;
+                Debug.WriteLine("Project Supports Transforms.");
 
                 if (!ItemSupportsTransforms(vsProject, itemid)) return;
+                Debug.WriteLine("Selected Tranform and Destination Exist.");
 
                 menuCommand.Visible = true;
                 menuCommand.Enabled = true;
@@ -185,6 +173,10 @@ namespace ApplyConfigTransformInPlace.VSIX
 
             var transformFileInfo = new FileInfo(itemFullPath);
             bool isConfig = transformFileInfo.Name.EndsWith(".config", StringComparison.OrdinalIgnoreCase);
+
+            if (DestinationExists(itemFullPath)) { 
+                this.TransformFile = itemFullPath;
+            }
 
             return (isConfig && IsXmlFile(itemFullPath));
         }
@@ -273,7 +265,42 @@ namespace ApplyConfigTransformInPlace.VSIX
             }
         }
 
+        private void ApplyTransform()
+        {
+            if(this.TransformFile == null ||
+                this.DestinationFile == null)
+            {
+                Debug.WriteLine("Source Or Destination where null.  Nothing to do.");
+                return;
+            }
+            ITransformer transformer = new XmlTransformer();
+            transformer.Transform(this.DestinationFile, this.TransformFile, this.DestinationFile);
 
+        }
+
+        private bool DestinationExists(string sourceFile)
+        {
+            var transformFileInfo = new FileInfo(sourceFile);
+            if(transformFileInfo.Name.StartsWith("web.", StringComparison.OrdinalIgnoreCase))
+            {
+               var tempDestination = sourceFile.Replace(transformFileInfo.Name, "Web.config");
+                if (File.Exists(tempDestination))
+                {
+                    this.DestinationFile = tempDestination;
+                    return true;
+                }
+            }
+            if (transformFileInfo.Name.StartsWith("app.", StringComparison.OrdinalIgnoreCase))
+            {
+                this.DestinationFile = this.TransformFile.Replace(transformFileInfo.Name, "App.config");
+                if (File.Exists(this.DestinationFile))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
         /// <summary>
         /// This function is the callback used to execute the command when the menu item is clicked.
@@ -284,17 +311,9 @@ namespace ApplyConfigTransformInPlace.VSIX
         /// <param name="e">Event args.</param>
         private void MenuItemCallback(object sender, EventArgs e)
         {
-            string message = string.Format(CultureInfo.CurrentCulture, "Inside {0}.MenuItemCallback()", this.GetType().FullName);
-            string title = "Apply Config Transform In Place";
+            Debug.WriteLine(string.Format(CultureInfo.CurrentCulture, "Inside {0}.MenuItemCallback()", this.GetType().FullName));
+            this.ApplyTransform();
 
-            // Show a message box to prove we were here
-            VsShellUtilities.ShowMessageBox(
-                this.ServiceProvider,
-                message,
-                title,
-                OLEMSGICON.OLEMSGICON_INFO,
-                OLEMSGBUTTON.OLEMSGBUTTON_OK,
-                OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
         }
     }
 }

@@ -29,6 +29,7 @@ namespace ApplyConfigTransformInPlace.VSIX
     /// To get loaded into VS, the package must be referred by &lt;Asset Type="Microsoft.VisualStudio.VsPackage" ...&gt; in .vsixmanifest file.
     /// </para>
     /// </remarks>
+    [ProvideAutoLoad(UIContextGuids80.SolutionExists)]
     [PackageRegistration(UseManagedResourcesOnly = true)]
     [InstalledProductRegistration("#110", "#112", "1.0", IconResourceID = 400)] // Info on this package for Help/About
     [ProvideMenuResource("Menus.ctmenu", 1)]
@@ -50,6 +51,7 @@ namespace ApplyConfigTransformInPlace.VSIX
             // any Visual Studio service because at this point the package object is created but
             // not sited yet inside Visual Studio environment. The place to do all the other
             // initialization is the Initialize method.
+            Debug.WriteLine("Entering ApplyConfigTransformInPlaceCmdPackage() of: {0}", this);
         }
 
         #region Package Members
@@ -60,6 +62,7 @@ namespace ApplyConfigTransformInPlace.VSIX
         /// </summary>
         protected override void Initialize()
         {
+            Debug.WriteLine("Entering Initialize() of: {0}", this);
             ApplyConfigTransformInPlaceCmd.Initialize(this);
             base.Initialize();
             //new ApplyConfigTransformInPlaceCmd(this).DetermineIfItemShouldBeDisplayed();
