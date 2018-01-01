@@ -56,6 +56,7 @@
   <ItemGroup>
     <Compile Include="ApplyConfigTransformInPlaceCmd.cs" />
     <Compile Include="ApplyConfigTransformInPlaceCmdPackage.cs" />
+    <Compile Include="ApplyConfigTransformInPlaceLogic.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -74,6 +75,10 @@
     <Content Include="index.html" />
     <Content Include="Resources\ApplyConfigTransformInPlaceCmd.png" />
     <Content Include="Resources\ApplyConfigTransformInPlaceCmdPackage.ico" />
+    <Content Include="Resources\Marketplace-Icon-128.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <Content Include="Resources\Merge-005FF9-16.png" />
     <Content Include="stylesheet.css" />
   </ItemGroup>

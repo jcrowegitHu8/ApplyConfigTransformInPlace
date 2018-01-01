@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Xml;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
@@ -97,10 +98,6 @@ namespace ApplyConfigTransformInPlace.VSIX
                 Console.WriteLine("Command Evaluating");
                 var menuCommandID = new CommandID(CommandSet, CommandId);
 
-                // WE COMMENT OUT THE LINE BELOW
-                //var menuItem = new MenuCommand(this.MenuItemCallback, menuCommandID);
-
-                // AND REPLACE IT WITH A DIFFERENT TYPE
                 var menuItem = new OleMenuCommand(MenuItemCallback, menuCommandID);
                 menuItem.BeforeQueryStatus += menuCommand_BeforeQueryStatus;
 
@@ -116,6 +113,8 @@ namespace ApplyConfigTransformInPlace.VSIX
             if (menuCommand != null)
             {
                 Debug.WriteLine("Evaluating BeforeQueryStatus.");
+                ClearTransformVariables();
+
                 // start by assuming that the menu will not be shown
                 menuCommand.Visible = false;
                 menuCommand.Enabled = false;
@@ -123,8 +122,8 @@ namespace ApplyConfigTransformInPlace.VSIX
                 IVsHierarchy hierarchy = null;
                 uint itemid = VSConstants.VSITEMID_NIL;
 
-                if (!IsSingleProjectItemSelection(out hierarchy, out itemid)) return;
-                Debug.WriteLine("Project Is NOT Selected.");
+                if (!IsSingleProjectItemSelected(out hierarchy, out itemid)) return;
+                Debug.WriteLine("Single item is Selected.");
 
                 var vsProject = (IVsProject)hierarchy;
                 if (!ProjectSupportsTransforms(vsProject)) return;
@@ -169,16 +168,20 @@ namespace ApplyConfigTransformInPlace.VSIX
 
             if (ErrorHandler.Failed(project.GetMkDocument(itemid, out itemFullPath))) return false;
 
-            //TODO 
-
             var transformFileInfo = new FileInfo(itemFullPath);
-            bool isConfig = transformFileInfo.Name.EndsWith(".config", StringComparison.OrdinalIgnoreCase);
+            string outDestinationFilePrefix;
+            var isTransform = ApplyConfigTransformInPlaceLogic.IsSupportedTransform(transformFileInfo.Name, out outDestinationFilePrefix);
+            if (!isTransform)
+            {
+                return false;
+            }
 
-            if (DestinationExists(itemFullPath)) { 
+            if (DestinationExists(itemFullPath, outDestinationFilePrefix + "config"))
+            {
                 this.TransformFile = itemFullPath;
             }
 
-            return (isConfig && IsXmlFile(itemFullPath));
+            return IsXmlFile(itemFullPath);
         }
 
 
@@ -204,7 +207,7 @@ namespace ApplyConfigTransformInPlace.VSIX
             return isXmlFile;
         }
 
-        public static bool IsSingleProjectItemSelection(out IVsHierarchy hierarchy, out uint itemid)
+        public static bool IsSingleProjectItemSelected(out IVsHierarchy hierarchy, out uint itemid)
         {
             hierarchy = null;
             itemid = VSConstants.VSITEMID_NIL;
@@ -267,7 +270,7 @@ namespace ApplyConfigTransformInPlace.VSIX
 
         private void ApplyTransform()
         {
-            if(this.TransformFile == null ||
+            if (this.TransformFile == null ||
                 this.DestinationFile == null)
             {
                 Debug.WriteLine("Source Or Destination where null.  Nothing to do.");
@@ -278,28 +281,23 @@ namespace ApplyConfigTransformInPlace.VSIX
 
         }
 
-        private bool DestinationExists(string sourceFile)
+        private bool DestinationExists(string sourceFile, string destinationNameToReplace)
         {
             var transformFileInfo = new FileInfo(sourceFile);
-            if(transformFileInfo.Name.StartsWith("web.", StringComparison.OrdinalIgnoreCase))
-            {
-               var tempDestination = sourceFile.Replace(transformFileInfo.Name, "Web.config");
-                if (File.Exists(tempDestination))
-                {
-                    this.DestinationFile = tempDestination;
-                    return true;
-                }
-            }
-            if (transformFileInfo.Name.StartsWith("app.", StringComparison.OrdinalIgnoreCase))
-            {
-                this.DestinationFile = this.TransformFile.Replace(transformFileInfo.Name, "App.config");
-                if (File.Exists(this.DestinationFile))
-                {
-                    return true;
-                }
-            }
 
+            var tempDestination = sourceFile.Replace(transformFileInfo.Name, destinationNameToReplace);
+            if (File.Exists(tempDestination))
+            {
+                this.DestinationFile = tempDestination;
+                return true;
+            }
             return false;
+        }
+        
+        private void ClearTransformVariables()
+        {
+            this.DestinationFile = null;
+            this.TransformFile = null;
         }
 
         /// <summary>

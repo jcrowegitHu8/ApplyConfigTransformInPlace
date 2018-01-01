@@ -65,7 +65,6 @@ namespace ApplyConfigTransformInPlace.VSIX
             Debug.WriteLine("Entering Initialize() of: {0}", this);
             ApplyConfigTransformInPlaceCmd.Initialize(this);
             base.Initialize();
-            //new ApplyConfigTransformInPlaceCmd(this).DetermineIfItemShouldBeDisplayed();
         }
 
         #endregion
