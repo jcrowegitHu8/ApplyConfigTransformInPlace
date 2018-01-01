@@ -74,6 +74,7 @@
     <Content Include="index.html" />
     <Content Include="Resources\ApplyConfigTransformInPlaceCmd.png" />
     <Content Include="Resources\ApplyConfigTransformInPlaceCmdPackage.ico" />
+    <Content Include="Resources\Merge-005FF9-16.png" />
     <Content Include="stylesheet.css" />
   </ItemGroup>
   <ItemGroup>
