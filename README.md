@@ -9,12 +9,17 @@ example transform names:
 - saml.dev-1.config
 - app.test_env1.config
 
-How it works:
+### How it works:
 1. Right click on a transform (ex: Web.Release.config).
 2. Click 'Apply Config Transform In Place'
 3.  The Visual Studio Extension finds the relative Web.config in the same directory and applies the transform.
 
 ![alt text](./ReadMeResources/ApplyTransformInPlace1.png)
+
+### Transform doesn't have to be include in project
+When developing locally I often find that I have a consistent setup I might do that is not the normal.  So I'll take the time to create my own transform but not add them to the project.
+
+![alt text](./ReadMeResources/FileNotIncludedInProject1.png)
 
 # Versions
 
