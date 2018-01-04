@@ -2,7 +2,7 @@
 
 Provides a quick, no frills, way to apply any Web or App transform to its respective parent in place.  This tool is meant to speed local development. Download it at the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=jcrowe.ApplyConfigTransformInPlace)
 
-Note: This tool will work for any transform that matches the regex ["([\w]+\.)[\w-]+\.config"](https://regex101.com/r/oqNyED/1) Provided that the transform and the calculated destination are in the same folder path.
+Note: This tool will work for any transform that matches the regex ["([\w]+\.)[\w- ]+\.config"](https://regex101.com/r/oqNyED/2) Provided that the transform and the calculated destination are in the same folder path.
 
 example transform names:
 - web.debug.config
