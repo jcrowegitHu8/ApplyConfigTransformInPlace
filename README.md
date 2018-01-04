@@ -8,6 +8,7 @@ example transform names:
 - web.debug.config
 - saml.dev-1.config
 - app.test_env1.config
+- Web.Dev - 1.Config
 
 ### How it works:
 1. Right click on a transform (ex: Web.Release.config).
@@ -23,5 +24,11 @@ When developing locally I often find that I have a consistent setup I might do t
 
 # Versions
 
-1.1.0.1:
+1.3
+- Added case insesative to regex matching.
+
+1.2:
+- Accounted for white space in transform name (ex: Web.Dev - 1.config) with regex.
+
+1.1:
 - able to work for any transform that matches the regex ["([\w]+\.)[\w-]+\.config"](https://regex101.com/r/oqNyED/1)
