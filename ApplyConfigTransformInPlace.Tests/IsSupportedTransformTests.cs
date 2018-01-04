@@ -21,6 +21,7 @@ namespace ApplyConfigTransformInPlace.Tests
             PositiveAssert("app.anything.config","app.");
             PositiveAssert("app.Dev_1.config","app.");
             PositiveAssert("app.Dev-1.config","app.");
+            PositiveAssert("app.Dev - 1.config", "app.");
             PositiveAssert("app.123.config", "app.");
         }
 

@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="ApplyConfigTransformInPlace.VSIX.ab26b1ca-e3c2-4a81-975d-e7e77b2a8a9d" Version="1.1" Language="en-US" Publisher="Jason Crowe" />
+        <Identity Id="ApplyConfigTransformInPlace.VSIX.ab26b1ca-e3c2-4a81-975d-e7e77b2a8a9d" Version="1.2" Language="en-US" Publisher="Jason Crowe" />
         <DisplayName>ApplyConfigTransformInPlace</DisplayName>
         <Description xml:space="preserve">Provides a quick, no frills, way to apply any Web, App, or Other transform to its respective parent in place.  This tool is meant to speed local development transforming.</Description>
         <MoreInfo>https://github.com/jcrowegitHu8/ApplyConfigTransformInPlace</MoreInfo>
