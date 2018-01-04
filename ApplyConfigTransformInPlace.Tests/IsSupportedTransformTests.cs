@@ -28,8 +28,8 @@ namespace ApplyConfigTransformInPlace.Tests
         [TestMethod]
         public void IsSupportedTransform_is_case_insensative()
         {
-            NegativeAssert("web.config");
-            NegativeAssert("Web.Config");
+            PositiveAssert("web.test.config","web.");
+            PositiveAssert("Web.test.Config", "Web.");
         }
 
         private void PositiveAssert(string transformFileName, string expectedDestinationPrefix)

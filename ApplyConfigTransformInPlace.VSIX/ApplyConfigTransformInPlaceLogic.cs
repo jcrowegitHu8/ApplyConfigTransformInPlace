@@ -10,7 +10,7 @@ namespace ApplyConfigTransformInPlace.VSIX
 {
     public static class ApplyConfigTransformInPlaceLogic
     {
-        private static Regex supportedTransformRegex = new Regex(@"([\w]+\.)[\w- ]+\.config");
+        private static Regex supportedTransformRegex = new Regex(@"([\w]+\.)[\w- ]+\.config", RegexOptions.IgnoreCase);
         public static bool IsSupportedTransform(string fileName, out string destinationPrefix)
         {
             destinationPrefix = string.Empty;
